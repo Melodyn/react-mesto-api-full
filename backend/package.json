@@ -1,0 +1,43 @@
+{
+  "name": "@melodyn/mesto-backend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Memesto backend",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "dev": "nodemon ./bin/index.js",
+    "start": "NODE_ENV=production ./bin/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Melodyn/express-mesto-gha.git"
+  },
+  "keywords": [],
+  "author": "Sergei Melodyn",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Melodyn/express-mesto-gha/issues"
+  },
+  "homepage": "https://github.com/Melodyn/express-mesto-gha#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.1",
+    "celebrate": "^15.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.6.5",
+    "pino-http": "^8.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.25.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "nodemon": "^2.0.20",
+    "pino-pretty": "^9.1.1"
+  }
+}
