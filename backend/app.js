@@ -7,7 +7,8 @@ import mongoose from 'mongoose';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import pino from 'pino-http';
+import winston from 'winston';
+import winstonExpress from 'express-winston';
 import { errors, isCelebrateError } from 'celebrate';
 // modules
 import { HTTPError } from './errors/index.js';
@@ -25,36 +26,45 @@ export const run = async (envName) => {
     process.exit(1);
   });
 
-  const config = dotenv.config({ path: path.resolve(__dirname, '.env.common') }).parsed;
+  const isProduction = envName.includes('prod');
+  const config = dotenv.config({
+    path: path.resolve(__dirname, (isProduction ? '.env' : '.env.common')),
+  }).parsed;
   if (!config) {
     throw new Error('Config not found');
   }
   config.NODE_ENV = envName;
+  config.IS_PROD = isProduction;
 
-  const app = express();
-  const loggerConfig = envName.includes('prod')
-    ? { level: config.LOG_LEVEL }
-    : {
-      transport: {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-        },
-      },
-      level: config.LOG_LEVEL,
-    };
-  const logger = pino(loggerConfig);
+  const requestLogger = winstonExpress.logger({
+    transports: [
+      new winston.transports.File({
+        filename: path.resolve(__dirname, 'request.log'),
+      }),
+    ],
+    format: winston.format.json(),
+  });
+  const errorLogger = winstonExpress.errorLogger({
+    transports: [
+      new winston.transports.File({
+        filename: path.resolve(__dirname, 'error.log'),
+      }),
+    ],
+    format: winston.format.json(),
+  });
+
   const allowedOrigins = [
     'http://project.melodyn.nomoredomains.icu',
     'https://project.melodyn.nomoredomains.icu',
   ];
 
+  const app = express();
   app.set('config', config);
-  app.use(logger);
+  app.use(requestLogger);
   app.use(bodyParser.json());
   app.use(cors(
     {
-      origin: config.NODE_ENV.includes('prod') ? allowedOrigins : '*',
+      origin: config.IS_PROD ? allowedOrigins : '*',
       allowedHeaders: ['Content-Type', 'Authorization'],
     },
   ));
@@ -71,12 +81,12 @@ export const run = async (envName) => {
   app.all('/*', (req, res) => {
     res.status(constants.HTTP_STATUS_NOT_FOUND).send({ message: 'Запрашиваемая страница не найдена' });
   });
+  app.use(errorLogger);
   app.use((err, req, res, next) => {
     const isHttpError = err instanceof HTTPError;
     const isValidatorError = isCelebrateError(err);
     const isModelError = (err.name === 'ValidationError') || (err.name === 'CastError');
 
-    req.log.debug(err);
     if (isHttpError) {
       res.status(err.statusCode).send({
         message: err.message,

@@ -29,15 +29,15 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "express-winston": "^4.2.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.6.5",
-    "pino-http": "^8.2.1"
+    "winston": "^3.8.2"
   },
   "devDependencies": {
     "eslint": "^8.25.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
-    "nodemon": "^2.0.20",
-    "pino-pretty": "^9.1.1"
+    "nodemon": "^2.0.20"
   }
 }
