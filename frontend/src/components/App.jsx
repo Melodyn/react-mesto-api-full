@@ -55,8 +55,19 @@ export const App = ({ config }) => {
     setCurrentUser(updatedUser);
   };
 
+  const onLogout = () => {
+    updateUser(defaultCurrentUser);
+    updateCards([null]);
+    navigate('/signin');
+  };
+
   useEffect(() => {
+    const processError = (err, showError) => {
+      showError(err);
+      onLogout();
+    };
     apiMesto.setToken(currentUser.token);
+
     if (currentUser.token) {
       apiMesto.checkToken()
         .then((result) => {
@@ -74,13 +85,12 @@ export const App = ({ config }) => {
                 });
                 navigate('/');
               })
-              .catch(showErrorInPopup('при получении данных с сервера'));
+              .catch((err) => processError(err, showErrorInPopup('при получении данных с сервера')));
           }
         })
-        .catch((showErrorInPopup('при проверке токена')));
+        .catch((err) => processError(err, showErrorInPopup('при проверке токена')));
     } else {
-      updateUser(defaultCurrentUser);
-      updateCards([]);
+      onLogout();
     }
   }, [currentUser.token]);
 
@@ -202,11 +212,6 @@ export const App = ({ config }) => {
         }
       })
       .catch(showErrorInPopup());
-  };
-
-  const onLogout = () => {
-    updateUser(defaultCurrentUser);
-    navigate('/signin');
   };
 
   return (
